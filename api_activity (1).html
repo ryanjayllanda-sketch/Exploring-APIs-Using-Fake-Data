@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exploring APIs Using Fake Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f4f6f8;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #1a1a2e;
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #555;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    thead {
+      background: #1a1a2e;
+      color: white;
+    }
+    thead th {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+    tbody tr {
+      border-bottom: 1px solid #e8e8e8;
+      transition: background 0.2s;
+    }
+    tbody tr:hover {
+      background: #f0f4ff;
+    }
+    tbody tr.personal-row {
+      background: #e8f5e9;
+      font-weight: bold;
+    }
+    tbody tr.personal-row:hover {
+      background: #d4edda;
+    }
+    td {
+      padding: 12px 16px;
+      font-size: 0.88rem;
+    }
+    .badge {
+      background: #4caf50;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 6px;
+      font-weight: normal;
+      vertical-align: middle;
+    }
+    #loading {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+      font-size: 1rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Exploring APIs Using Fake Data</h1>
+  <p class="subtitle">Activity: Fetching and displaying user data from <a href="https://jsonplaceholder.typicode.com/users" target="_blank">JSONPlaceholder API</a></p>
+
+  <div id="loading">Loading data from API...</div>
+
+  <table id="user-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Zipcode</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+  </table>
+
+  <footer>Data source: https://jsonplaceholder.typicode.com/users</footer>
+
+  <script>
+    const myInfo = {
+      id: 0,
+      name: "Ryan Jay Llanda",
+      username: "Ryanjay1",
+      email: "ryanjay.llanda@nmsc.edu.ph",
+      address: { zipcode: "7200" }
+    };
+
+    function splitName(fullName) {
+      const parts = fullName.trim().split(" ");
+      const last = parts.pop();
+      const first = parts.join(" ") || last;
+      return { first, last };
+    }
+
+    function buildRow(user, isPersonal = false) {
+      const { first, last } = splitName(user.name);
+      const tr = document.createElement("tr");
+      if (isPersonal) tr.classList.add("personal-row");
+      tr.innerHTML = `
+        <td>${isPersonal ? "YOU" : user.id}</td>
+        <td>${first}${isPersonal ? '<span class="badge">You</span>' : ""}</td>
+        <td>${last}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${user.address.zipcode}</td>
+      `;
+      return tr;
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+        const users = await res.json();
+
+        const tbody = document.getElementById("table-body");
+        tbody.appendChild(buildRow(myInfo, true));
+        users.forEach(u => tbody.appendChild(buildRow(u)));
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("user-table").style.display = "table";
+      } catch (err) {
+        document.getElementById("loading").textContent = "Failed to load data. Check your internet connection.";
+      }
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
